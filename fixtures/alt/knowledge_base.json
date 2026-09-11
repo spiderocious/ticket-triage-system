@@ -1,0 +1,23 @@
+[
+  {
+    "doc_id": "DOC-PAY-01",
+    "title": "Payout processing windows",
+    "category": "payments",
+    "content": "Payouts may sit in processing while manual review, verification checks, or payment partner settlement complete. Staff must not promise a completion time unless the status is confirmed in back-office tooling. Typical review windows are up to 24 hours, but exceptions exist.",
+    "tags": ["payout", "withdrawal", "processing", "manual review"]
+  },
+  {
+    "doc_id": "DOC-SEC-01",
+    "title": "Suspected account compromise",
+    "category": "security",
+    "content": "When a customer reports unauthorised access, a login they do not recognise, or a lost 2FA device, the case must be routed to identity verification. Staff must not disable 2FA or reset credentials over chat or email outside the documented verification flow.",
+    "tags": ["security", "2fa", "verification", "compromise"]
+  },
+  {
+    "doc_id": "DOC-PRV-01",
+    "title": "Account data disclosure limits",
+    "category": "privacy",
+    "content": "Automated systems and staff must not disclose account balance, transaction history, statements, or other account-specific financial data except through authenticated product surfaces or an approved secure workflow.",
+    "tags": ["balance", "transactions", "statement", "privacy"]
+  }
+]

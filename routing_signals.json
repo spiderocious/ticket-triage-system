@@ -1,0 +1,62 @@
+[
+  {
+    "asks_for_account_specific_data": false,
+    "asks_for_guaranteed_timeline": true,
+    "evidence_is_weak_or_missing": false,
+    "is_security_sensitive": false,
+    "matched_phrases": [
+      "pending for 18 hours",
+      "when it will complete"
+    ],
+    "relevant_doc_ids": [
+      "kb_001"
+    ],
+    "retrieval_confidence": 0.6309,
+    "safe_for_auto_answer": true,
+    "ticket_id": "t001",
+    "triggered_rules": [
+      "must_not_promise_unverified_timeframes"
+    ]
+  },
+  {
+    "asks_for_account_specific_data": false,
+    "asks_for_guaranteed_timeline": false,
+    "evidence_is_weak_or_missing": false,
+    "is_security_sensitive": true,
+    "matched_phrases": [
+      "2FA",
+      "no longer have access to my phone"
+    ],
+    "relevant_doc_ids": [
+      "kb_002"
+    ],
+    "retrieval_confidence": 0.6364,
+    "safe_for_auto_answer": false,
+    "ticket_id": "t002",
+    "triggered_rules": [
+      "security_sensitive_topics_require_review"
+    ]
+  },
+  {
+    "asks_for_account_specific_data": true,
+    "asks_for_guaranteed_timeline": false,
+    "evidence_is_weak_or_missing": false,
+    "is_security_sensitive": false,
+    "matched_phrases": [
+      "my account balance",
+      "my current account balance",
+      "last 5 transactions",
+      "transactions"
+    ],
+    "relevant_doc_ids": [
+      "kb_003"
+    ],
+    "retrieval_confidence": 0.6652,
+    "safe_for_auto_answer": false,
+    "ticket_id": "t003",
+    "triggered_rules": [
+      "must_not_claim_account_specific_data",
+      "privacy_sensitive_requests_must_be_redirected"
+    ]
+  }
+]

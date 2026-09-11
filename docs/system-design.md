@@ -1,6 +1,7 @@
 # Triage Pipeline — System Design
 
-An auditable support-triage service in **TypeScript + Node 20+ + the `openai` SDK**. Code owns every decision; the model writes prose and nothing else.
+An auditable support-triage service in **TypeScript + Node 20+ + the `openai` SDK**. 
+Code owns every decision; the model writes prose and nothing else.
 
 ---
 

@@ -1,0 +1,108 @@
+[
+  {
+    "retrieved": [
+      {
+        "doc_id": "kb_001",
+        "match_reasons": [
+          "keyword: delay",
+          "keyword: hour",
+          "keyword: withdraw",
+          "synonym: withdraw→payment",
+          "synonym: withdraw→process",
+          "synonym: delay→review",
+          "synonym: delay→process",
+          "synonym: delay→timeline",
+          "synonym: delay→verificate",
+          "synonym: pend→review",
+          "synonym: pend→process",
+          "synonym: pend→timeline",
+          "synonym: complete→process",
+          "synonym: complete→timeline",
+          "synonym: complete→review",
+          "tag: withdraw",
+          "category: payments"
+        ],
+        "score": 0.6309
+      },
+      {
+        "doc_id": "kb_002",
+        "match_reasons": [
+          "synonym: delay→verificate"
+        ],
+        "score": 0.08
+      }
+    ],
+    "ticket_id": "t001"
+  },
+  {
+    "retrieved": [
+      {
+        "doc_id": "kb_002",
+        "match_reasons": [
+          "keyword: 2fa",
+          "keyword: access",
+          "keyword: reset",
+          "synonym: reset→procedure",
+          "synonym: reset→verificate",
+          "synonym: reset→security",
+          "synonym: 2fa→security",
+          "synonym: 2fa→verificate",
+          "synonym: 2fa→device",
+          "synonym: phone→device",
+          "tag: 2fa",
+          "category: security"
+        ],
+        "score": 0.6364
+      },
+      {
+        "doc_id": "kb_003",
+        "match_reasons": [
+          "keyword: access",
+          "keyword: account"
+        ],
+        "score": 0.1042
+      },
+      {
+        "doc_id": "kb_001",
+        "match_reasons": [
+          "keyword: account",
+          "synonym: reset→verificate",
+          "synonym: 2fa→verificate"
+        ],
+        "score": 0.0425
+      }
+    ],
+    "ticket_id": "t002"
+  },
+  {
+    "retrieved": [
+      {
+        "doc_id": "kb_003",
+        "match_reasons": [
+          "keyword: account",
+          "keyword: balance",
+          "keyword: transaction",
+          "synonym: balance→financi",
+          "synonym: balance→privacy",
+          "synonym: balance→data",
+          "synonym: transaction→history",
+          "synonym: transaction→financi",
+          "synonym: transaction→privacy",
+          "synonym: transaction→data",
+          "tag: balance",
+          "tag: transaction",
+          "category: privacy"
+        ],
+        "score": 0.6652
+      },
+      {
+        "doc_id": "kb_001",
+        "match_reasons": [
+          "keyword: account"
+        ],
+        "score": 0.0433
+      }
+    ],
+    "ticket_id": "t003"
+  }
+]

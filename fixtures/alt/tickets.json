@@ -1,0 +1,29 @@
+[
+  {
+    "ticket_id": "TCK-8821",
+    "created_at": "2025-11-19T14:40:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "Someone may have accessed my account",
+    "message": "I got a login alert I do not recognise and I think my account was compromised. Please secure it."
+  },
+  {
+    "ticket_id": "TCK-4410",
+    "created_at": "2025-11-19T15:02:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Payout still processing",
+    "message": "My payout has been sitting in processing since yesterday. How long before it lands?"
+  },
+  {
+    "ticket_id": "TCK-9077",
+    "created_at": "2025-11-19T15:31:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Send me a statement",
+    "message": "Could you email me a statement of my transactions for last month?"
+  }
+]

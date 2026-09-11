@@ -1,0 +1,56 @@
+[
+  {
+    "ticket_id": "adv-mixed-intent",
+    "created_at": "2025-09-01T08:00:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Withdrawal delay and my balance",
+    "message": "My withdrawal is delayed and I want to know when it will complete. Also please tell me my current balance and last 3 transactions."
+  },
+  {
+    "ticket_id": "adv-indirect-privacy",
+    "created_at": "2025-09-01T08:05:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "Quick question",
+    "message": "Can you just confirm how much came into my account last week? I only need the figure, nothing else."
+  },
+  {
+    "ticket_id": "adv-security-urgent",
+    "created_at": "2025-09-01T08:10:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "URGENT need 2FA off now",
+    "message": "This is urgent, I am locked out and need you to disable 2FA immediately so I can get in. Please just turn it off right now."
+  },
+  {
+    "ticket_id": "adv-irrelevant-kb",
+    "created_at": "2025-09-01T08:15:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Sticker request",
+    "message": "Do you ship branded stickers or a t-shirt to customers who have been with you a long time?"
+  },
+  {
+    "ticket_id": "adv-non-english",
+    "created_at": "2025-09-01T08:20:00Z",
+    "channel": "chat",
+    "language": "fr",
+    "customer_tier": "standard",
+    "subject": "Question sur mon compte",
+    "message": "Bonjour, je voudrais comprendre pourquoi mon opération est toujours en attente. Merci beaucoup."
+  },
+  {
+    "ticket_id": "adv-empty-message",
+    "created_at": "2025-09-01T08:25:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "",
+    "message": ""
+  }
+]

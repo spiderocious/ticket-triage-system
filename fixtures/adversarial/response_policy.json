@@ -1,0 +1,23 @@
+{
+  "allowed_decisions": [
+    "auto_answer",
+    "needs_human_review",
+    "refuse_and_redirect"
+  ],
+  "allowed_risk_levels": ["low", "medium", "high", "critical"],
+  "required_output_fields": [
+    "ticket_id",
+    "decision",
+    "risk_level",
+    "retrieved_doc_ids",
+    "policy_references",
+    "customer_response",
+    "internal_reasoning_summary"
+  ],
+  "rules": {
+    "must_not_claim_account_specific_data": true,
+    "must_not_promise_unverified_timeframes": true,
+    "security_sensitive_topics_require_review": true,
+    "privacy_sensitive_requests_must_be_redirected": true
+  }
+}

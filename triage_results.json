@@ -1,0 +1,46 @@
+[
+  {
+    "customer_response": "Thanks for getting in touch about why was my withdrawal delayed. Withdrawals may be delayed for manual review, verification checks, payment partner processing, or unusual account activity. Support agents must not promise a completion time unless status is confirmed in back-office tools. We have not confirmed the status of your specific case here, so we cannot give an exact completion time. If it has not resolved, please reply and our team will look into it further.",
+    "decision": "auto_answer",
+    "internal_reasoning_summary": "Decision auto_answer (risk medium) set by ladder_4_timeline. Policy references: must_not_promise_unverified_timeframes. Top documents: kb_001, kb_002. Retrieval confidence 0.6309.",
+    "policy_references": [
+      "must_not_promise_unverified_timeframes"
+    ],
+    "retrieved_doc_ids": [
+      "kb_001",
+      "kb_002"
+    ],
+    "risk_level": "medium",
+    "ticket_id": "t001"
+  },
+  {
+    "customer_response": "Thanks for contacting us about Reset 2FA after losing phone. This request needs to be handled by our identity verification team, so we have routed it for review. For your protection we cannot change security settings over chat or email without completing the documented verification steps. You will hear back from our team with the next steps. Please do not share codes or passwords with anyone.",
+    "decision": "needs_human_review",
+    "internal_reasoning_summary": "Decision needs_human_review (risk high) set by ladder_2_security. Policy references: security_sensitive_topics_require_review. Top documents: kb_002, kb_003, kb_001. Retrieval confidence 0.6364.",
+    "policy_references": [
+      "security_sensitive_topics_require_review"
+    ],
+    "retrieved_doc_ids": [
+      "kb_002",
+      "kb_003",
+      "kb_001"
+    ],
+    "risk_level": "high",
+    "ticket_id": "t002"
+  },
+  {
+    "customer_response": "Thanks for reaching out. We are not able to share account-specific information such as balances or transaction history through this channel. Please sign in to your account in the app or on the website, where this information is available securely. If you cannot sign in, reply here and our team will help you regain access.",
+    "decision": "refuse_and_redirect",
+    "internal_reasoning_summary": "Decision refuse_and_redirect (risk high) set by ladder_1_account_data. Policy references: must_not_claim_account_specific_data, privacy_sensitive_requests_must_be_redirected. Top documents: kb_003, kb_001. Retrieval confidence 0.6652.",
+    "policy_references": [
+      "must_not_claim_account_specific_data",
+      "privacy_sensitive_requests_must_be_redirected"
+    ],
+    "retrieved_doc_ids": [
+      "kb_003",
+      "kb_001"
+    ],
+    "risk_level": "high",
+    "ticket_id": "t003"
+  }
+]

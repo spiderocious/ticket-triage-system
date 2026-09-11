@@ -1,24 +1,27 @@
-// CONTRACT — implemented by llm module.
-import type { Draft } from "../core/types.js";
+import { DEFAULT_OPENAI_MODEL } from "../core/constants.js";
+import { ERR } from "../core/errors.js";
+import { appError } from "../core/messages.js";
+import { err, ok } from "../core/result.js";
 import type { Result } from "../core/result.js";
-import type { BuiltPrompt, DraftRequest, LlmProvider } from "./types.js";
+import { MockProvider } from "./mock.js";
+import { OpenAiProvider } from "./openai.js";
+import type { LlmProvider } from "./types.js";
+
+export { buildPrompt } from "./prompt.js";
+export { validateDrafts } from "./validate.js";
+export { makeCallRecord } from "./call-log.js";
+export { DraftSchema, DraftItemSchema } from "./schema.js";
+export { MockProvider } from "./mock.js";
+export { OpenAiProvider } from "./openai.js";
 export type { BuiltPrompt, DraftRequest, DraftTicketContext, LlmProvider } from "./types.js";
 
-/** Deterministic prompt builder. Same request => same strings => same hash. Includes policy rules as hard constraints,
- *  the decision + risk as facts to express, retrieved snippets, signals, and repair notes if present. */
-export function buildPrompt(_req: DraftRequest): BuiltPrompt {
-  throw new Error("not implemented");
-}
-
 /** "openai" -> OpenAI provider (err llm_key_missing if no key), "mock" -> deterministic templates, else err llm_provider_unknown. */
-export function createProvider(_name: string, _env: NodeJS.ProcessEnv): Result<LlmProvider> {
-  throw new Error("not implemented");
-}
-
-/** Validate unknown provider output against the Draft schema and reconcile ticket ids 1:1 with expected.
- *  err(llm_output_invalid) on schema failure, err(ticket_reconciliation_failed) on missing/duplicate/unknown ids.
- *  Returned drafts are in the order of `expectedTicketIds`. */
-export function validateDrafts(_raw: unknown, _expectedTicketIds: string[]): Result<Draft[]>;
-export function validateDrafts(): Result<Draft[]> {
-  throw new Error("not implemented");
+export function createProvider(name: string, env: NodeJS.ProcessEnv): Result<LlmProvider> {
+  if (name === "openai") {
+    const key = env.OPENAI_API_KEY;
+    if (!key) return err(appError(ERR.llm_key_missing));
+    return ok(new OpenAiProvider(key, env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL));
+  }
+  if (name === "mock") return ok(new MockProvider());
+  return err(appError(ERR.llm_provider_unknown, name));
 }
