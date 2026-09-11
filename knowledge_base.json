@@ -1,0 +1,24 @@
+[
+  {
+    "doc_id": "kb_001",
+    "title": "Withdrawal review timeline",
+    "category": "payments",
+    "content": "Withdrawals may be delayed for manual review, verification checks, payment partner processing, or unusual account activity. Support agents must not promise a completion time unless status is confirmed in back-office tools. Typical review windows are up to 24 hours, but exceptions exist.",
+    "tags": ["withdrawal", "manual review", "processing"]
+  },
+  {
+    "doc_id": "kb_002",
+    "title": "2FA reset procedure",
+    "category": "security",
+    "content": "If a customer loses access to their 2FA device, support must route the case to identity verification. Agents must not disable 2FA directly through chat or email without the documented verification flow.",
+    "tags": ["2fa", "security", "verification"]
+  },
+  {
+    "doc_id": "kb_003",
+    "title": "Account-specific data access policy",
+    "category": "privacy",
+    "content": "Agents and automated systems must not provide account balance, transaction history, or other account-specific financial data unless the request is fulfilled through authenticated product surfaces or approved secure workflows.",
+    "tags": ["balance", "transactions", "privacy"]
+  }
+]
+

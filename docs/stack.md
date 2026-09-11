@@ -1,0 +1,3 @@
+- Typescript
+- NodeJS
+- AI tooling - openai sdk

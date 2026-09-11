@@ -1,0 +1,42 @@
+# MVP List
+
+- As a user, I should be able to run the pipeline from a clean checkout with a single command.
+- As a user, I should be able to point the pipeline at `tickets.json`, `knowledge_base.json`, and `response_policy.json` on disk.
+- As a user, I should be able to swap in different input files with the same schema and have the pipeline work unchanged.
+- As a user, I should be able to see the pipeline fail clearly when an input file is missing, malformed, or violates the schema.
+- As a user, I should be able to get normalized ticket and document text before any scoring happens.
+- As a user, I should be able to retrieve the top relevant knowledge base documents for every ticket deterministically.
+- As a user, I should be able to read `retrieval_results.json` and see each ticket's retrieved doc IDs, scores, and match reasons.
+- As a user, I should be able to re-run retrieval on the same inputs and get byte-identical results.
+- As a user, I should be able to see, per ticket, whether the request asks for account-specific data.
+- As a user, I should be able to see, per ticket, whether the topic is security-sensitive.
+- As a user, I should be able to see, per ticket, whether the request asks for a guaranteed timeline.
+- As a user, I should be able to see, per ticket, whether the retrieved evidence is weak or missing.
+- As a user, I should be able to see, per ticket, whether the ticket is safe for automatic answering under policy.
+- As a user, I should be able to read `routing_signals.json` and see the matched phrases, triggered rules, and relevant doc IDs behind every signal.
+- As a user, I should be able to get exactly one decision per ticket from `auto_answer`, `needs_human_review`, or `refuse_and_redirect`.
+- As a user, I should be able to confirm the decision was computed in code, not chosen by the LLM.
+- As a user, I should be able to have all customer responses and internal summaries drafted in one combined LLM call.
+- As a user, I should be able to have the LLM output structurally validated before it is written to any artifact.
+- As a user, I should be able to have LLM output rejected or repaired when it contradicts the deterministic decision or uses a disallowed decision or risk level.
+- As a user, I should be able to read `triage_results.json` and see `ticket_id`, `decision`, `risk_level`, `retrieved_doc_ids`, `policy_references`, `customer_response`, and `internal_reasoning_summary` for every ticket.
+- As a user, I should be able to trust that no customer response discloses account balances, transactions, or personal data.
+- As a user, I should be able to trust that no customer response promises an exact resolution time unsupported by policy and evidence.
+- As a user, I should be able to trust that no customer response disables or bypasses a security procedure.
+- As a user, I should be able to trace every customer response back to the retrieved knowledge base documents.
+- As a user, I should be able to read a clear next step in every refusal or escalation response.
+- As a user, I should be able to run `python validate.py` as a single validation command.
+- As a user, I should be able to have validation confirm all required artifacts exist and contain valid JSON.
+- As a user, I should be able to have validation confirm every ticket has a retrieval result, routing signals, and a final result.
+- As a user, I should be able to have validation re-derive the deterministic decisions and confirm the final results match.
+- As a user, I should be able to have validation confirm only allowed decisions and risk levels are used.
+- As a user, I should be able to have validation confirm every final result carries retrieved doc IDs and policy references.
+- As a user, I should be able to have validation confirm privacy-sensitive responses disclose no account-specific data.
+- As a user, I should be able to have validation confirm timeline responses promise no unsupported completion times.
+- As a user, I should be able to read `llm_calls.jsonl` and see one record per LLM call with stage, ticket ID, timestamp, provider, model, prompt hash, input artifacts, and output artifact.
+- As a user, I should be able to have weak retrieval automatically downgrade a ticket away from auto-answering.
+- As a user, I should be able to read a retrieval-confidence value and the recorded reason an answer was not auto-sent in `fallback_analysis.json`.
+- As a user, I should be able to run tests covering irrelevant retrieved documents, mixed-intent tickets, indirectly phrased privacy requests, and security requests with urgency language.
+- As a user, I should be able to read `design_notes.md` for the retrieval approach, deterministic vs model-owned responsibilities, safety failure modes, and production improvements.
+- As a user, I should be able to run the pipeline with explicit file paths via CLI flags.
+- As a user, I should be able to run the whole pipeline without providing any secret or private service credential.

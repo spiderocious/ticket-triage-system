@@ -1,0 +1,29 @@
+[
+  {
+    "ticket_id": "t001",
+    "created_at": "2025-08-04T09:14:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Why was my withdrawal delayed?",
+    "message": "My withdrawal has been pending for 18 hours. Can you tell me why and when it will complete?"
+  },
+  {
+    "ticket_id": "t002",
+    "created_at": "2025-08-04T10:02:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "Reset 2FA after losing phone",
+    "message": "I no longer have access to my phone and need help resetting 2FA on my account."
+  },
+  {
+    "ticket_id": "t003",
+    "created_at": "2025-08-04T10:15:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Tell me my account balance",
+    "message": "Please tell me my current account balance and last 5 transactions."
+  }
+]
