@@ -13,3 +13,13 @@ export const DraftItemSchema = z.object({
 export const DraftSchema = z.object({
   drafts: z.array(DraftItemSchema),
 });
+
+/**
+ * Used only to DETECT routing fields the model should never send. Kept separate from DraftSchema, which strips unknown
+ * keys: stripping is the right behaviour for harmless extras, but a decision or risk level is not a harmless extra.
+ */
+export const ForbiddenFieldsSchema = z.object({
+  ticket_id: z.string().optional(),
+  decision: z.string().optional(),
+  risk_level: z.string().optional(),
+});

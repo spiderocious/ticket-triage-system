@@ -8,7 +8,7 @@ import { OpenAiProvider } from "./openai.js";
 import type { LlmProvider } from "./types.js";
 
 export { buildPrompt } from "./prompt.js";
-export { validateDrafts } from "./validate.js";
+export { validateDrafts, checkNoRoutingFields } from "./validate.js";
 export { makeCallRecord } from "./call-log.js";
 export { DraftSchema, DraftItemSchema } from "./schema.js";
 export { MockProvider } from "./mock.js";

@@ -1,4 +1,6 @@
-import { INPUT_DEFAULTS, TOP_K_DEFAULT } from "./core/constants.js";
+import { INPUT_DEFAULTS, MOCK_PROVIDER_NAME, TOP_K_DEFAULT } from "./core/constants.js";
+import { makeTerminalDeps, promptForMissingKey } from "./cli-prompt.js";
+import { loadDotEnv } from "./io/env.js";
 import { runPipeline } from "./pipeline.js";
 
 interface Flags {
@@ -53,15 +55,28 @@ const USAGE = `Usage: npm start -- [options]
 Set OPENAI_API_KEY for the openai provider, or use --provider mock to run with no secret.`;
 
 async function main(): Promise<void> {
+  await loadDotEnv(process.cwd(), process.env);
   const flags = parseArgs(process.argv.slice(2), process.env);
   if (flags.help) {
     process.stdout.write(`${USAGE}\n`);
     return;
   }
+  // The openai provider needs a key. Rather than failing outright, offer the mock provider when a human is watching.
+  let provider = flags.provider;
+  if (provider !== MOCK_PROVIDER_NAME && (process.env.OPENAI_API_KEY ?? "") === "") {
+    const outcome = await promptForMissingKey(makeTerminalDeps());
+    if (outcome.kind === "abort") {
+      process.stderr.write(`${outcome.message}\n`);
+      process.exitCode = 1;
+      return;
+    }
+    provider = MOCK_PROVIDER_NAME;
+  }
+
   const result = await runPipeline({
     paths: { tickets: flags.tickets, kb: flags.kb, policy: flags.policy },
     outDir: flags.out,
-    providerName: flags.provider,
+    providerName: provider,
     topK: flags.topK,
   });
   if (!result.ok) {
@@ -72,7 +87,7 @@ async function main(): Promise<void> {
   }
   const s = result.value;
   const lines = [
-    `Triaged ${s.ticketCount} ticket(s) with provider "${flags.provider}".`,
+    `Triaged ${s.ticketCount} ticket(s) with provider "${provider}".`,
     ...Object.entries(s.decisions).sort().map(([d, n]) => `  ${d}: ${n}`),
     s.repairedTickets.length > 0 ? `  repaired: ${s.repairedTickets.join(", ")}` : "",
     s.templatedTickets.length > 0 ? `  templated: ${s.templatedTickets.join(", ")}` : "",

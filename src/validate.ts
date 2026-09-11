@@ -10,6 +10,7 @@ import type { FallbackRecord, LlmCallRecord, RetrievalRecord, RoutingSignals, Tr
 import { decide } from "./decide/index.js";
 import { checkPrivacyText, checkSecurityBypassText, checkTimelineText, checkNextStep } from "./gate/index.js";
 import { loadInputs, readJsonFile } from "./io/load.js";
+import { validateDrafts } from "./llm/index.js";
 import { retrieveAll } from "./retrieval/index.js";
 import { buildSignals } from "./signals/index.js";
 import { DECISION } from "./core/constants.js";
@@ -23,6 +24,11 @@ interface Check {
 const results: Check[] = [];
 function check(name: string, ok: boolean, detail?: string): void {
   results.push(detail === undefined ? { name, ok } : { name, ok, detail });
+}
+
+const GROUNDING_STOPWORDS = new Set(["the","and","for","are","was","with","that","this","your","you","our","can","not","but","may","have","has","from","will","their","its","any","all","unless","must","through","into","other","such"]);
+function groundingTokens(s: string): string[] {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3 && !GROUNDING_STOPWORDS.has(w)).map((w) => (w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
 }
 
 function isRecordArray(v: unknown): v is Array<Record<string, unknown>> {
@@ -193,6 +199,34 @@ export async function validate(flags: Flags): Promise<boolean> {
   check("every refusal or escalation states a next step", nextStepFails.length === 0, nextStepFails.join(", ") || undefined);
   const emptyText = triage.filter((t) => t.customer_response.trim() === "" || t.internal_reasoning_summary.trim() === "").map((t) => t.ticket_id);
   check("every final record has a customer response and an internal summary", emptyText.length === 0, emptyText.join(", ") || undefined);
+
+  // --- the drafted text is traceable to the documents cited for that ticket (features.md section 4) ---
+  const ungrounded: string[] = [];
+  for (const t of triage.filter((x) => x.decision === DECISION.auto)) {
+    const r = retrieval.find((x) => x.ticket_id === t.ticket_id);
+    const top = r?.retrieved[0];
+    const topDoc = top ? kb.find((d) => d.doc_id === top.doc_id) : undefined;
+    if (!topDoc) continue;
+    const docTerms = new Set(groundingTokens(`${topDoc.title} ${topDoc.content} ${topDoc.tags.join(" ")}`));
+    const shared = new Set(groundingTokens(t.customer_response).filter((w) => docTerms.has(w)));
+    if (shared.size < 2) ungrounded.push(t.ticket_id);
+  }
+  check("auto-answered responses are grounded in their cited documents", ungrounded.length === 0, ungrounded.join(", ") || undefined);
+
+  // --- the model never supplied routing fields; every decision is re-derivable from code alone ---
+  const routingOwnedByCode = triage.every((t) => {
+    const s = signals.find((x) => x.ticket_id === t.ticket_id);
+    if (!s) return false;
+    const d = decide(s, policy);
+    return d.ok && d.value.decision === t.decision && d.value.risk_level === t.risk_level;
+  });
+  check("every decision and risk level is reproducible from code without the model", routingOwnedByCode);
+
+  // --- llm output structure was validated before anything was finalised (features.md section 5) ---
+  const structureValidated = triage.every(
+    (t) => typeof t.customer_response === "string" && typeof t.internal_reasoning_summary === "string" && !("decision_source" in t),
+  ) && triage.every((t) => validateDrafts({ drafts: [{ ticket_id: t.ticket_id, customer_response: t.customer_response, internal_reasoning_summary: t.internal_reasoning_summary }] }, [t.ticket_id]).ok);
+  check("finalised drafts satisfy the LLM output schema", structureValidated);
 
   // --- llm_calls.jsonl ---
   const required = ["stage", "ticket_id", "timestamp", "provider", "model", "prompt_hash", "input_artifacts", "output_artifact"];

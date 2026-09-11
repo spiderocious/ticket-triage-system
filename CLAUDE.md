@@ -119,3 +119,32 @@ Useful as a smoke test, but never hardcode these outcomes:
   logic so they are unit-testable without I/O.
 - When the system design diagram arrives, record it in `docs/system-design.md` and update
   this file if it changes any of the above.
+
+## Conventions that emerged during implementation
+
+- **`Result<T, AppError>` everywhere.** No function in `src/` throws a domain error. `unwrap`
+  exists only for the CLI and test boundary. Error identities live in `src/core/errors.ts` as
+  stable snake_case keys; human text lives in `src/core/messages.ts`. Branch on the identity,
+  never the message.
+- **Tunable constants are named and exported** from `src/core/constants.ts` so the validator,
+  the pipeline, and `design_notes.md` all cite the same numbers. The weak-evidence floor is
+  0.10, the ambiguity margin 0.05, the strong-evidence bar 0.35, scores round to 4 decimals.
+- **`src/decide/` is imported by both the pipeline and the validator.** The validator
+  re-derives signals and decisions from raw inputs and compares. Never fork this logic.
+- **Retrieval always cites at least one document.** A ticket with no lexical overlap falls back
+  to the first document at score 0, which still reads as weak evidence and routes to review.
+  This keeps `retrieved_doc_ids` non-empty as the schema requires.
+- **The safety gate runs on the template too.** A deterministic fallback that could violate a
+  rule fails the run rather than shipping.
+- **Repair is per-ticket, not per-batch.** Only tickets that failed the gate are resent.
+- **A model that returns `decision` or `risk_level` fails the call** with identity
+  `llm_owned_decision`, even when the value agrees with the computed one. Stripping it would
+  hide a model trying to own routing. See `checkNoRoutingFields`.
+- **Validation has three entry points** that all run the same 37 checks: `python validate.py`
+  (the command the brief names), `npm run validate`, and `make validate`.
+- **Provider switch.** `LLM_PROVIDER=mock` selects a deterministic template renderer that goes
+  through the same schema, gate, and call log. `npm start` with no key asks whether to use it;
+  a non-interactive run exits with setup instructions rather than hanging.
+- **`.env` in the working directory is read by the CLI.** Real environment values always win.
+- **ESLint's unused-args rule honours the `_` prefix**, matching tsconfig, so interface-mandated
+  unused parameters need no per-site disable.

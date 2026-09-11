@@ -45,6 +45,12 @@ export function retrieveForTicket(index: TfIdfIndex, ticket: Ticket, topK: numbe
     scored.push({ doc_id: d.doc.doc_id, score, match_reasons: [...new Set(reasons)] });
   }
   scored.sort((a, b) => b.score - a.score || a.doc_id.localeCompare(b.doc_id));
+  if (scored.length === 0) {
+    // Every ticket must cite something: the schema requires a non-empty retrieved_doc_ids, and a citation-free
+    // response cannot be traced. A zero score still reads as weak evidence downstream, so this never auto-answers.
+    const first = index.docs[0];
+    if (first) return [{ doc_id: first.doc.doc_id, score: 0, match_reasons: ["fallback: no lexical overlap with any document"] }];
+  }
   return scored.slice(0, topK);
 }
 

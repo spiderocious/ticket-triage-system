@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DECISION, RISK, RULE } from "../src/core/constants.js";
 import { ERR } from "../src/core/errors.js";
 import type { DecisionOutcome, KbDoc, Policy, RoutingSignals, Ticket } from "../src/core/types.js";
-import { buildPrompt, createProvider, validateDrafts } from "../src/llm/index.js";
+import { buildPrompt, checkNoRoutingFields, createProvider, validateDrafts } from "../src/llm/index.js";
 import { MockProvider } from "../src/llm/mock.js";
 import type { DraftRequest, DraftTicketContext } from "../src/llm/types.js";
 
@@ -249,5 +249,54 @@ describe("createProvider", () => {
     const res = createProvider("mock", {});
     expect(res.ok).toBe(true);
     if (res.ok) expect(res.value.name).toBe("mock");
+  });
+});
+
+describe("the model may not own the routing decision", () => {
+  const policy: Policy = {
+    allowed_decisions: ["auto_answer", "needs_human_review", "refuse_and_redirect"],
+    allowed_risk_levels: ["low", "medium", "high", "critical"],
+    required_output_fields: ["ticket_id", "decision"],
+    rules: { must_not_claim_account_specific_data: true },
+  };
+  const ticket: Ticket = { ticket_id: "t1", created_at: "2025-08-04T09:00:00Z", channel: "chat", language: "en", customer_tier: "standard", subject: "s", message: "m" };
+  const signals: RoutingSignals = {
+    ticket_id: "t1", asks_for_account_specific_data: false, is_security_sensitive: false, asks_for_guaranteed_timeline: false,
+    evidence_is_weak_or_missing: false, safe_for_auto_answer: true, matched_phrases: [], triggered_rules: [], relevant_doc_ids: ["kb_001"], retrieval_confidence: 0.5,
+  };
+  const outcome: DecisionOutcome = { decision: "auto_answer", risk_level: "low", policy_references: ["must_not_claim_account_specific_data"], rule_fired: "ladder_5_default", decision_without_evidence_fallback: "auto_answer" };
+  const contexts: DraftTicketContext[] = [{ ticket, retrieved: [], signals, outcome }];
+  const body = { ticket_id: "t1", customer_response: "x".repeat(60), internal_reasoning_summary: "y".repeat(30) };
+
+  it("accepts a draft carrying no routing fields", () => {
+    expect(checkNoRoutingFields({ drafts: [body] }, contexts, policy).ok).toBe(true);
+  });
+  it("rejects a draft that contradicts the computed decision", () => {
+    const r = checkNoRoutingFields({ drafts: [{ ...body, decision: "refuse_and_redirect" }] }, contexts, policy);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error.identity).toBe("llm_owned_decision");
+      expect(r.error.detail ?? "").toContain("contradicts");
+    }
+  });
+  it("rejects a draft using a decision the policy does not allow", () => {
+    const r = checkNoRoutingFields({ drafts: [{ ...body, decision: "DELETE_EVERYTHING" }] }, contexts, policy);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.detail ?? "").toContain("not an allowed decision");
+  });
+  it("rejects a draft using a risk level the policy does not allow", () => {
+    const r = checkNoRoutingFields({ drafts: [{ ...body, risk_level: "nuclear" }] }, contexts, policy);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.detail ?? "").toContain("not an allowed risk level");
+  });
+  it("rejects even a routing field that agrees, because the model gets no vote", () => {
+    const r = checkNoRoutingFields({ drafts: [{ ...body, decision: "auto_answer" }] }, contexts, policy);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.detail ?? "").toContain("agrees with");
+  });
+  it("strips harmless unknown keys without failing", () => {
+    const r = validateDrafts({ drafts: [{ ...body, tone: "friendly" }] }, ["t1"]);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(Object.keys(r.value[0] ?? {})).not.toContain("tone");
   });
 });

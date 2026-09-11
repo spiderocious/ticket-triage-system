@@ -7,7 +7,7 @@ import type { Draft, FallbackRecord, LlmCallRecord, RetrievalRecord, RoutingSign
 import { buildFallbackRecord, checkDraft, templateDraft } from "./gate/index.js";
 import { loadInputs, type InputPaths } from "./io/load.js";
 import { appendJsonl, truncateFile, writeJsonArtifact } from "./io/write.js";
-import { buildPrompt, createProvider, makeCallRecord, validateDrafts } from "./llm/index.js";
+import { buildPrompt, checkNoRoutingFields, createProvider, makeCallRecord, validateDrafts } from "./llm/index.js";
 import type { DraftTicketContext } from "./llm/types.js";
 import { decide } from "./decide/index.js";
 import { retrieveAll } from "./retrieval/index.js";
@@ -84,7 +84,10 @@ export async function runPipeline(opts: PipelineOptions): Promise<Result<Pipelin
   const expectedIds = tickets.map((t) => t.ticket_id);
   const prompt = buildPrompt({ contexts, policy });
   const raw = await provider.draft(prompt, { contexts, policy });
-  const validated = raw.ok ? validateDrafts({ drafts: raw.value }, expectedIds) : raw;
+  // The model must not return routing fields at all. A returned decision is a bid to own the routing, so it fails the
+  // call rather than being quietly stripped — whether it agrees with the computed decision or contradicts it.
+  const routingCheck = raw.ok ? checkNoRoutingFields({ drafts: raw.value }, contexts, policy) : ok(undefined);
+  const validated = !raw.ok ? raw : !routingCheck.ok ? routingCheck : validateDrafts({ drafts: raw.value }, expectedIds);
   const genLog = await logCall(
     makeCallRecord({
       stage: "response_generation",
@@ -125,7 +128,8 @@ export async function runPipeline(opts: PipelineOptions): Promise<Result<Pipelin
     const repairIds = repairContexts.map((c) => c.ticket.ticket_id);
     const repairPrompt = buildPrompt({ contexts: repairContexts, policy, repairNotes });
     const repairRaw = await provider.draft(repairPrompt, { contexts: repairContexts, policy, repairNotes });
-    const repairValidated = repairRaw.ok ? validateDrafts({ drafts: repairRaw.value }, repairIds) : repairRaw;
+    const repairRouting = repairRaw.ok ? checkNoRoutingFields({ drafts: repairRaw.value }, repairContexts, policy) : ok(undefined);
+    const repairValidated = !repairRaw.ok ? repairRaw : !repairRouting.ok ? repairRouting : validateDrafts({ drafts: repairRaw.value }, repairIds);
     const repairLog = await logCall(
       makeCallRecord({
         stage: "response_repair",

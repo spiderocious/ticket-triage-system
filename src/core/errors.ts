@@ -12,6 +12,7 @@ export const ERR = {
   llm_provider_unknown: "llm_provider_unknown",
   llm_call_failed: "llm_call_failed",
   llm_output_invalid: "llm_output_invalid",
+  llm_owned_decision: "llm_owned_decision",
   ticket_reconciliation_failed: "ticket_reconciliation_failed",
   safety_violation: "safety_violation",
   required_field_unsupported: "required_field_unsupported",

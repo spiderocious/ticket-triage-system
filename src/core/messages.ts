@@ -15,6 +15,7 @@ export const MESSAGES: Record<ErrorIdentity, string> = {
   llm_provider_unknown: "Unknown LLM provider. Use 'openai' or 'mock'.",
   llm_call_failed: "The LLM call failed.",
   llm_output_invalid: "The LLM returned output that failed schema validation.",
+  llm_owned_decision: "The LLM returned a routing decision or risk level, which only deterministic code may set.",
   ticket_reconciliation_failed: "LLM drafts do not reconcile one-to-one with input tickets.",
   safety_violation: "A drafted response violated a safety constraint.",
   required_field_unsupported: "The policy requires an output field this pipeline cannot supply.",
