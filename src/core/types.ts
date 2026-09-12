@@ -82,4 +82,14 @@ export interface FallbackRecord {
   original_decision: string;
   final_decision: string;
   reason_not_auto_sent: string;
+  /** Top retrieval score, or 0 when nothing was retrieved. */
+  top_score: number;
+  /** Runner-up score, or null when fewer than two documents were retrieved. */
+  second_score: number | null;
+  /** top_score - second_score, or null when there is no runner-up. A narrow margin means an ambiguous match. */
+  margin: number | null;
+  /** Which trigger fired: below_floor | ambiguous_top_two | no_documents | near_threshold | template_substituted. */
+  trigger: string;
+  /** What the pipeline did about it. */
+  action_taken: string;
 }

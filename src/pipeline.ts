@@ -12,6 +12,7 @@ import type { DraftTicketContext } from "./llm/types.js";
 import { decide } from "./decide/index.js";
 import { retrieveAll } from "./retrieval/index.js";
 import { buildSignals } from "./signals/index.js";
+import { assessEvidence } from "./signals/evidence.js";
 
 export interface PipelineOptions {
   paths: InputPaths;
@@ -190,7 +191,9 @@ export async function runPipeline(opts: PipelineOptions): Promise<Result<Pipelin
       if (!(field in record)) return err(appError(ERR.required_field_unsupported, field));
     }
     triage.push(record);
-    const fb = buildFallbackRecord(ctx, templated, remaining?.join("; "));
+    const retrievalRecord = retrieval.find((r) => r.ticket_id === id);
+    const evidence = assessEvidence(retrievalRecord ?? { ticket_id: id, retrieved: [] });
+    const fb = buildFallbackRecord(ctx, templated, remaining?.join("; "), evidence);
     if (fb) fallbacks.push(fb);
   }
 

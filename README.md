@@ -36,11 +36,15 @@ pipeline runs without an API key.
 npm ci
 LLM_PROVIDER=mock npm start     # full run, no API key needed
 npm run validate                # independent re-derivation of every decision
-npm test                        # 127 tests across 7 files
+npm test                        # 137 tests across 8 files
 ```
 
 That is the entire evaluation path and none of it requires a secret. Expect three tickets resolving to one decision
 each, then `37/37 checks passed`.
+
+Only the middle command is the product. `npm ci` installs dependencies once, and `npm run validate` is a grader that
+checks the output rather than part of the pipeline. **[test-plan.md](test-plan.md) walks through every command, what it
+is for, and exactly what to expect** — start there if the output is not obvious.
 
 To use a real model instead:
 
@@ -71,7 +75,7 @@ No database, no network service, and no external state. Everything reads from an
 | `npm run validate` | Re-derives decisions from raw inputs and runs 37 checks |
 | `python3 validate.py` | Same 37 checks, via the entry point the brief names |
 | `make validate` | Same 37 checks |
-| `npm test` | 127 tests across 7 files |
+| `npm test` | 137 tests across 8 files |
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run lint` | ESLint |
 | `npm start -- --help` | Flag reference |
@@ -230,6 +234,13 @@ to the same gate as the model's own text, so a template that could violate a rul
 ## Artifacts
 
 Written to the repository root by default, or to `--out <dir>`.
+
+> **The committed artifacts were generated with `LLM_PROVIDER=mock`,** so that they are reproducible without a key.
+> The `customer_response` and `internal_reasoning_summary` fields in them are deterministic template text, not model
+> prose. Everything else — decisions, risk levels, citations, signals, scores, the call log, the safety gate — is
+> identical to a real run, because the mock provider passes through the same schema, gate and reconciliation.
+> To see genuine model drafting, set `OPENAI_API_KEY` and run `npm start`; the artifacts are overwritten in place and
+> every validation check still applies.
 
 | File | Contents |
 |---|---|
@@ -421,6 +432,7 @@ npx vitest                          # watch mode
 | `tests/gate.test.ts` | Each safety validator positive and negative, template substitution |
 | `tests/llm.test.ts` | Prompt determinism, schema validation, reconciliation, routing-field rejection |
 | `tests/cli.test.ts` | Missing-key prompt in both modes, `.env` loading semantics |
+| `tests/fallback.test.ts` | Every fallback trigger, score detail, and the weak-but-not-downgraded case |
 | `tests/pipeline.e2e.test.ts` | All three fixture sets end to end, then validated |
 
 The end-to-end suite runs the full pipeline on the sample, alternate, and adversarial fixtures, then runs the validator
@@ -546,7 +558,7 @@ src/
   cli.ts       flags, missing-key prompt
   validate.ts  independent re-derivation, 37 checks
 fixtures/      alt + adversarial input sets
-tests/         7 files, 127 tests
+tests/         8 files, 137 tests
 docs/          spec.md, system-design.md, todo.md
 validate.py    thin shim to src/validate.ts
 ```
@@ -577,6 +589,7 @@ newer and run `npm ci` first.
 
 | Document | Contents |
 |---|---|
+| `test-plan.md` | Every command explained, expected output, how to read the artifacts |
 | `design_notes.md` | Retrieval tradeoffs, deterministic/model split, safety failure modes, production improvements |
 | `docs/system-design.md` | The architecture this implementation follows |
 | `docs/spec.md` | The merged specification |

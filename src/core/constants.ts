@@ -11,6 +11,8 @@ export const DEFAULT_OPENAI_MODEL = "gpt-4o-2024-08-06";
 export const OPENAI_SEED = 7;
 export const MOCK_PROVIDER_NAME = "mock";
 export const MOCK_MODEL_NAME = "deterministic-template-v1";
+/** Bumped whenever the draft response schema changes; folded into the prompt hash. */
+export const SCHEMA_VERSION = "draft-v1";
 
 export const ARTIFACTS = {
   retrieval: "retrieval_results.json",

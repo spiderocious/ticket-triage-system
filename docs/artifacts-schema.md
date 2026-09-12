@@ -149,15 +149,66 @@ One JSON object per line, one line per LLM call.
 A repair retry is a second call and gets its own line.
 
 ### `fallback_analysis.json`
-Array, one record per ticket that was downgraded or flagged.
+Array, one record per ticket that was downgraded, flagged as near-threshold, or had its text substituted. Empty array
+when every ticket retrieved strong evidence and every draft passed the safety gate first time.
+
+```json
+{
+  "ticket_id": "adv-irrelevant-kb",
+  "retrieval_confidence": 0.0705,
+  "original_decision": "auto_answer",
+  "final_decision": "needs_human_review",
+  "reason_not_auto_sent": "retrieval evidence was weak or missing (confidence 0.0705), so the ticket was downgraded from auto_answer to needs_human_review",
+  "top_score": 0.0705,
+  "second_score": 0.0503,
+  "margin": 0.0202,
+  "trigger": "below_floor",
+  "action_taken": "downgraded_to_needs_human_review"
+}
+```
 
 | Field | Type | Notes |
 |---|---|---|
-| `ticket_id` | string | |
-| `retrieval_confidence` | number | Deterministic, derived from retrieval scores. |
+| `ticket_id` | string | Must match a ticket in `tickets.json`. |
+| `retrieval_confidence` | number | Deterministic, derived from retrieval scores. The top score, clamped to 0..1. |
 | `original_decision` | string | Decision before the fallback applied. |
-| `final_decision` | string | Decision after the fallback applied. |
-| `reason_not_auto_sent` | string | Why the answer was not auto-sent. |
+| `final_decision` | string | Decision after the fallback applied. Equals `original_decision` when only the text was substituted. |
+| `reason_not_auto_sent` | string | Human-readable explanation, semicolon-separated when several causes applied. |
+| `top_score` | number | Highest retrieval score for this ticket, or `0` when nothing was retrieved. |
+| `second_score` | number \| null | Runner-up score, or `null` when fewer than two documents were retrieved. |
+| `margin` | number \| null | `top_score - second_score`, or `null` when there is no runner-up. A narrow margin means an ambiguous match. |
+| `trigger` | string | Which condition fired. One of the values below. |
+| `action_taken` | string | What the pipeline did in response. |
+
+**`trigger` values**
+
+| Value | Meaning |
+|---|---|
+| `no_documents` | Retrieval returned nothing at all. |
+| `below_floor` | Top score below `WEAK_EVIDENCE_FLOOR` (0.10). |
+| `ambiguous_top_two` | Top two within `WEAK_EVIDENCE_MARGIN` (0.05) and top below `STRONG_EVIDENCE_BAR` (0.35). |
+| `near_threshold` | Cleared the floor but below the strong-evidence bar. Recorded for visibility; does not downgrade. |
+| `template_substituted` | The drafted and repaired text both failed the safety gate. |
+
+**`action_taken` values**
+
+| Value | Meaning |
+|---|---|
+| `downgraded_to_needs_human_review` | The weak-evidence ladder row overrode a more permissive decision. |
+| `recorded_only` | No decision change. Logged so thin or merely adequate retrieval is visible to a reviewer, either because the match sat below the strong-evidence bar or because a higher-priority safety rule had already claimed the ticket. |
+| `template_substituted` | Model text replaced with a deterministic template built from the decision and cited documents. |
+
+A single ticket can hit more than one condition. `trigger` and `action_taken` carry the most consequential one,
+while `reason_not_auto_sent` lists every cause that applied.
+
+**Weak evidence without a downgrade.** The ladder is ordered, so a privacy or security row can claim a ticket before
+the weak-evidence row is reached. The decision is then already restrictive and nothing is downgraded, but the retrieval
+behind it was still thin. Those tickets get a record with the evidence trigger (`below_floor`, `ambiguous_top_two`, or
+`no_documents`) and action `recorded_only`. Omitting them would hide the weakest retrievals in the run purely because a
+stricter rule happened to fire first.
+
+An empty array is a valid and meaningful result: it means every ticket retrieved strong evidence and every draft passed
+the safety gate on the first attempt.
 
 ### `design_notes.md`
 Prose. Must cover:

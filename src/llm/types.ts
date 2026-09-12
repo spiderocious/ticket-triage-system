@@ -13,13 +13,27 @@ export interface DraftRequest {
   policy: Policy;
   /** Present only on a repair call: ticket_id -> violations from the safety gate. */
   repairNotes?: Record<string, string[]>;
+  /** Decoding parameters to fold into the prompt hash. Defaults applied by buildPrompt when absent. */
+  identity?: PromptIdentity;
 }
 
 export interface BuiltPrompt {
   system: string;
   user: string;
-  /** sha256 of system + "\n---\n" + user. */
+  /**
+   * sha256 over the prompt text AND the decoding parameters that shape the output: model, temperature, seed and the
+   * response schema version. Hashing the text alone would let two runs against different models collide, which
+   * misstates reproducibility — the hash is an audit claim, so it has to cover everything that could change the answer.
+   */
   hash: string;
+}
+
+/** Decoding parameters folded into the prompt hash. */
+export interface PromptIdentity {
+  model: string;
+  temperature: number;
+  seed: number;
+  schema_version: string;
 }
 
 export interface LlmProvider {

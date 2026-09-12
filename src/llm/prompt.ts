@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { DECISION, RULE } from "../core/constants.js";
-import type { BuiltPrompt, DraftRequest, DraftTicketContext } from "./types.js";
+import { DECISION, DEFAULT_OPENAI_MODEL, OPENAI_SEED, RULE, SCHEMA_VERSION } from "../core/constants.js";
+import type { BuiltPrompt, DraftRequest, DraftTicketContext, PromptIdentity } from "./types.js";
 
 /** Plain-English gloss for each known policy rule key. Unknown keys fall back to the raw key. */
 const RULE_GLOSSES: Record<string, string> = {
@@ -100,10 +100,23 @@ function buildUser(req: DraftRequest): string {
   return lines.join("\n");
 }
 
-/** Deterministic prompt builder. Same request => same strings => same hash. */
+const DEFAULT_IDENTITY: PromptIdentity = {
+  model: DEFAULT_OPENAI_MODEL,
+  temperature: 0,
+  seed: OPENAI_SEED,
+  schema_version: SCHEMA_VERSION,
+};
+
+/**
+ * Deterministic prompt builder. Same request => same strings => same hash.
+ * The hash covers the decoding parameters as well as the text: a prompt sent to a different model, temperature or seed
+ * is a different call, and an audit log that hashed only the text would claim otherwise.
+ */
 export function buildPrompt(req: DraftRequest): BuiltPrompt {
   const system = buildSystem(req);
   const user = buildUser(req);
-  const hash = createHash("sha256").update(`${system}\n---\n${user}`).digest("hex");
+  const id = req.identity ?? DEFAULT_IDENTITY;
+  const identityLine = `model=${id.model};temperature=${String(id.temperature)};seed=${String(id.seed)};schema=${id.schema_version}`;
+  const hash = createHash("sha256").update(`${identityLine}\n---\n${system}\n---\n${user}`).digest("hex");
   return { system, user, hash };
 }

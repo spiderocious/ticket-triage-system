@@ -24,7 +24,7 @@ That is the entire model column. The decision reaches the model as *a fact it mu
 
 Yes, but less than the brief first suggests. Requirement 3 allows exactly one combined call drafting two strings per ticket. Retrieval must be deterministic; the routing decision must be reproducible from code. So the model is a **renderer at the tail of a pipeline that already decided everything**.
 
-That makes Node comfortable: the deterministic half is string processing — tokenize, TF-IDF, regex rules — with no numerical libraries needed. Python would buy scikit-learn we wouldn't use.
+Node is the right fit: the deterministic half is string processing — tokenize, TF-IDF, regex rules — and needs no numerical libraries.
 
 **Determinism caveat:** model prose is not byte-reproducible, and the spec doesn't require it. What must be reproducible are the *decisions* — computed before the call, re-derived independently by the validator. We set `temperature: 0` and a fixed `seed` anyway.
 
@@ -143,7 +143,7 @@ npm run validate                   # independent re-derivation
 npm test                           # adversarial + edge-case suite
 ```
 
-`OPENAI_API_KEY` is required; the pipeline exits naming the variable if absent. `validate` and `test` need no key — they operate on artifacts and pure functions, so the deterministic half is verifiable without spending a token.
+`OPENAI_API_KEY` drives the real provider. Without it the pipeline does not simply fail: `LLM_PROVIDER=mock` selects a deterministic template renderer that passes through the same schema, safety gate and call log, so the whole pipeline is exercised with no secret. An interactive run with no key offers that switch; a non-interactive one exits naming the variable rather than blocking on a keystroke. `validate` and `test` never need a key — they operate on artifacts and pure functions, so the deterministic half is verifiable without spending a token.
 
 ---
 

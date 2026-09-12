@@ -83,12 +83,25 @@ function gateTokens(s: string): string[] {
   return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3 && !GATE_STOPWORDS.has(w)).map((w) => (w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
 }
 
+/**
+ * Minimum distinct content terms an auto-answer must share with its top cited document.
+ * Four rather than two: two content words is satisfied by coincidence on a domain where "withdrawal" and "review"
+ * appear in almost any reply, so it certified grounding that had not happened. Four is high enough to require the
+ * response to actually track the document, and still clears legitimately short replies, which run 40+ words and
+ * typically share six to ten terms with the document they paraphrase.
+ */
+export const GROUNDING_MIN_SHARED_TERMS = 4;
+
 export function checkGrounding(draft: Draft, ctx: DraftTicketContext): string[] {
   const top = ctx.retrieved[0];
   if (!top) return [];
+  // A document cited at score 0 is the no-overlap fallback; there is nothing to be grounded in.
+  if (top.score === 0) return [];
   const docSet = new Set(gateTokens(`${top.doc.title} ${top.doc.content} ${top.doc.tags.join(" ")}`));
   const shared = new Set(gateTokens(draft.customer_response).filter((t) => docSet.has(t)));
-  return shared.size >= 2 ? [] : ["grounding: response does not draw on the retrieved documents"];
+  return shared.size >= GROUNDING_MIN_SHARED_TERMS
+    ? []
+    : [`grounding: response shares only ${String(shared.size)} content terms with ${top.doc.doc_id}, below the minimum of ${String(GROUNDING_MIN_SHARED_TERMS)}`];
 }
 
 /** The full gate for one draft. Structural validity is not safety, so every check runs against the final text. */

@@ -65,8 +65,25 @@ duration only when its sentence is promissory and carries no hedge, which keeps 
 **A confident answer from thin evidence.** Weak retrieval is the failure mode most likely to produce a fluent and wrong
 reply. The evidence test is a cosine floor of 0.10 plus a margin test: if the top two documents are within 0.05 of each
 other and the top score is below 0.35, the retrieval is treated as ambiguous. Either condition downgrades the ticket to
-human review and writes a record to `fallback_analysis.json` explaining why it was not auto-sent. Those constants are
-tuned on a three-document knowledge base and would need revisiting at scale.
+human review and writes a record to `fallback_analysis.json` explaining why it was not auto-sent.
+
+That file also records a third, non-downgrading case: a ticket whose top score clears the floor but sits below the
+strong-evidence bar is written with trigger `near_threshold` and action `recorded_only`. It changes no decision. It
+exists because a silent artifact is indistinguishable from an unexercised code path, and a reviewer should be able to
+see which matches were merely adequate rather than convincing. Every record carries `top_score`, `second_score` and
+`margin`, so the thresholds can be audited against the raw numbers rather than taken on trust.
+
+Those constants are tuned on a three-document knowledge base and would need revisiting at scale. The floor is the
+number most exposed to a larger corpus: TF-IDF scores compress as the document count grows, so a fixed 0.10 could
+eventually mark good matches weak. A percentile-based floor computed per corpus is the production answer.
+
+**An answer that cites a document it did not use.** Grounding is checked by counting distinct content terms shared
+between the reply and its top cited document. The threshold is four. Two, the obvious first choice, certifies grounding
+that has not happened: in this domain almost any plausible reply contains "withdrawal" and "review", so fabricated text
+cleared the bar. Four requires the reply to track the document, and still passes legitimate short replies, which run
+forty words or more and typically share six to ten terms with the document they paraphrase. The check is skipped when
+the cited document was the no-overlap fallback at score zero, since there is nothing to be grounded in and the
+weak-evidence rule has already routed the ticket away from an automatic answer.
 
 **Malformed or unusable model output.** Drafts are parsed against a schema and reconciled one-to-one with the input
 ticket set; a missing, duplicated, or unknown ticket id is a hard failure rather than a silent gap. A ticket that fails

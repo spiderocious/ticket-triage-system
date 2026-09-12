@@ -230,6 +230,16 @@ These resolve gaps or tensions between the docs. Change here first if you disagr
 | 2026-09-11 | clean checkout: `npm test` | 121 tests passed across 7 files |
 | 2026-09-11 | `npm start` with no key, non-interactive | exit 1 with setup instructions, no hang |
 
+Rows above are the first build. After the second review round the counts changed:
+
+| Date | Command | Result |
+|---|---|---|
+| 2026-09-11 | `npm test` (after review round 2) | 137 tests passed across 8 files |
+| 2026-09-11 | `npm run validate` (sample) | 37/37 checks passed |
+| 2026-09-11 | pipeline + validate on `fixtures/alt` | 37/37 checks passed |
+| 2026-09-11 | pipeline + validate on `fixtures/adversarial` | 37/37 checks passed, 4 fallback records |
+| 2026-09-11 | `npx tsc --noEmit` and `npx eslint src tests` | clean |
+
 ## Audit against docs/mvp-list.md and docs/features.md (2026-09-11)
 
 Every MVP line and every features.md requirement re-checked against the code. Four gaps found and closed:
@@ -247,6 +257,41 @@ Every MVP line and every features.md requirement re-checked against the code. Fo
 - [x] **Validator now checks response grounding and code-ownership of decisions** (MVP 18, 26).
 
 Validator grew from 34 to 37 checks. All three fixture sets pass 37/37.
+
+## Second review round (2026-09-11)
+
+External review raised ten points; one was withdrawn by the reviewer. Eight addressed, one declined with reasons.
+
+- [x] **`fallback_analysis.json` now records more than downgrades.** Three cases earn a record: a weak-evidence
+      downgrade, a template substitution, and weak evidence that did *not* downgrade because a safety row had already
+      claimed the ticket. A fourth, `near_threshold`, notes a match that cleared the floor but sat below the
+      strong-evidence bar. Records now carry `top_score`, `second_score`, `margin`, `trigger` and `action_taken`, so
+      the thresholds can be audited against raw numbers. Adversarial fixture produces 4 records.
+- [x] **Fallback record shape documented** in `docs/artifacts-schema.md`, including every `trigger` and
+      `action_taken` value and why an empty array is a valid result.
+- [x] **Prompt hash now covers model, temperature, seed and schema version**, not just the prompt text. Hashing text
+      alone let two runs against different models collide, which misstated reproducibility. Hash values changed as a
+      result, which is correct rather than a regression.
+- [x] **Grounding threshold raised from 2 shared terms to 4**, with the reasoning recorded in `design_notes.md`. Two
+      terms certified grounding that had not happened, since almost any plausible reply in this domain contains
+      "withdrawal" and "review". The check is now skipped when the cited document is the score-0 no-overlap fallback.
+- [x] **Weak-evidence tuning verified across all three fixtures** and documented, including that the floor is the
+      constant most exposed to a larger corpus and that a percentile-based floor is the production answer.
+- [x] **`docs/system-design.md` corrected.** Removed the Python-versus-Node comparison paragraph, and fixed the stale
+      claim that `OPENAI_API_KEY` is required, which contradicted both the README and the code.
+- [x] **README states plainly that committed artifacts came from the mock provider**, in a callout directly above the
+      artifacts section rather than buried in configuration.
+- [x] **Unit tests for the fallback path** in `tests/fallback.test.ts`, asserting records fire on each trigger.
+- [ ] **Declined: adding a Porter stemmer for out-of-domain retrieval.** Changing the token space shifts every cosine
+      score, moving tickets across the weak-evidence threshold and requiring every threshold and expected outcome to
+      be retuned. The normaliser already does light suffix stemming, and out-of-domain failure routes to human review,
+      which is a precision cost rather than a safety one. Tradeoff written up in `design_notes.md` instead.
+
+### Note on the sample fixture
+
+`fallback_analysis.json` is an empty array on the sample data and that is the honest result: all three sample tickets
+retrieve at 0.63 to 0.67 against a strong-evidence bar of 0.35. Moving the bar to manufacture a record would be
+dishonest. The adversarial fixture exercises every trigger.
 
 ## Deviations from the original plan
 
